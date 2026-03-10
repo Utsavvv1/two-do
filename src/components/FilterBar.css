@@ -1,0 +1,80 @@
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.filter-pills {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--bg-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.filter-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-xl);
+  transition: color 0.3s var(--transition-smooth);
+  z-index: 1;
+}
+
+.filter-pill:hover {
+  color: var(--text-secondary);
+}
+
+.filter-pill.active {
+  color: var(--text-primary);
+}
+
+.filter-pill-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(124, 179, 66, 0.12);
+  border: 1px solid rgba(124, 179, 66, 0.25);
+  border-radius: var(--radius-xl);
+  z-index: -1;
+}
+
+.filter-count {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  transition: all 0.3s var(--transition-smooth);
+}
+
+.filter-pill.active .filter-count {
+  background: rgba(124, 179, 66, 0.2);
+  color: var(--accent-green);
+}
+
+@media (max-width: 640px) {
+  .filter-pills {
+    width: 100%;
+  }
+
+  .filter-pill {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+}

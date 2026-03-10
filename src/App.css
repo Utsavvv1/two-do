@@ -1,0 +1,129 @@
+/* ─── App Layout ─── */
+.app {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Background ─── */
+.app-bg {
+  position: fixed;
+  inset: 0;
+  background-image: url('/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+  filter: brightness(0.35) saturate(0.9);
+  transform: scale(1.05);
+}
+
+.app-bg-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 14, 8, 0.65) 0%,
+    rgba(10, 14, 8, 0.45) 30%,
+    rgba(10, 14, 8, 0.55) 70%,
+    rgba(10, 14, 8, 0.85) 100%
+  );
+  z-index: 1;
+}
+
+/* ─── Particles ─── */
+.particles {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  background: var(--accent-sage);
+  border-radius: 50%;
+  animation: particle-float linear infinite;
+}
+
+@keyframes particle-float {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(30px);
+    opacity: 0;
+  }
+}
+
+/* ─── Container ─── */
+.app-container {
+  position: relative;
+  z-index: 3;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 20px 100px;
+  min-height: 100vh;
+}
+
+/* ─── Task List ─── */
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ─── FAB ─── */
+.fab {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-green), #5a8a2e);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 8px 32px rgba(124, 179, 66, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.35s var(--transition-smooth);
+  z-index: 50;
+}
+
+.fab:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(124, 179, 66, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  .app-container {
+    padding: 20px 16px 100px;
+  }
+
+  .fab {
+    bottom: 24px;
+    right: 24px;
+    width: 52px;
+    height: 52px;
+  }
+}
