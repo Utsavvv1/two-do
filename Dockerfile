@@ -65,7 +65,8 @@ RUN apt-get update \
 
 COPY deploy/docker/nginx-docker.conf /etc/nginx/conf.d/two-do.conf
 COPY deploy/docker/docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+# Strip CRLF when the build context comes from Windows (fixes tini "exec ... failed: No such file or directory")
+RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
 COPY --from=builder /app/apps/two-do/dist /var/www/two-do
 COPY --from=builder /app/apps/companion/dist /var/www/companion
