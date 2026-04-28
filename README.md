@@ -62,6 +62,10 @@ npm run ec2:build
 
 On Linux you can instead run `chmod +x deploy/ec2/*.sh && ./deploy/ec2/deploy.sh --stage` after configuring `.env.production` files and `services/auth-server/.env`.
 
+## Docker (Docker Hub)
+
+A single image serves both SPAs and the auth API behind nginx (`/auth-api/`). See **[`deploy/docker/README.md`](deploy/docker/README.md)** for **build-args**, **`docker push`**, and how your teacher should **`docker run`** with a mounted service account JSON.
+
 ## Firestore
 
 Add rules for `companion_notes` (same pattern as `tasks`: only the owner’s `userId`).
