@@ -60,7 +60,7 @@ Make executable: `chmod +x deploy/ec2/*.sh`
 3. **`AUTH_ALLOWED_ORIGINS`** on auth-server — exact `https://…` or `http://IP:port` origins users type in the browser.
 4. **HTTPS** — set `COOKIE_SECURE=1` on auth-server when using TLS.
 5. **Shared parent domain** — set `AUTH_COOKIE_DOMAIN=.example.com` when todo and companion are subdomains of `example.com`.
-6. **`VITE_AUTH_API_URL`** in **both** `.env.production` files — same scheme/host as the auth API (e.g. `http://YOUR_IP:8787` over HTTP, or `https://auth.example.com` with TLS). **Do not** mix `https://…` here while the API is only serving HTTP.
+6. **`VITE_AUTH_API_URL`** (build-time) — either **direct** to Node (`http://YOUR_IP:8787`, **same** in both apps; security group must allow **8787**) or **via nginx** (only **80** and **8080** public): see [`deploy/ec2/nginx.http-ip.example.conf`](nginx.http-ip.example.conf) and [`deploy/ec2/env/frontends.build.env.example`](env/frontends.build.env.example) (`/auth-api/` on port 80 for two-do, `/auth-api/` on **8080** for companion). **Do not** mix `https://…` here while the API is only serving HTTP.
 
 ## Ports-only (no DNS yet)
 
@@ -69,9 +69,9 @@ You can use `http://EC2_PUBLIC_IP:5173` style only for smoke tests; session cook
 ### SSO across port 80 and 8080 (same IP)
 
 - **`AUTH_ALLOWED_ORIGINS`** must include **both** browser origins exactly, e.g. `http://203.0.113.4` **and** `http://203.0.113.4:8080` (no trailing slashes). If one is missing, that app cannot exchange the session cookie with the auth API.
-- **`VITE_AUTH_API_URL`** must be the same in **both** built apps (usually `http://YOUR_IP:8787`), and the security group must allow **8787** from browsers, not only SSH.
+- **`VITE_AUTH_API_URL`:** either **same** URL in both apps (e.g. `http://YOUR_IP:8787` — open SG **8787**), or **proxied** via nginx [`nginx.http-ip.example.conf`](nginx.http-ip.example.conf): `http://YOUR_IP/auth-api` in **two-do** only and `http://YOUR_IP:8080/auth-api` in **companion** only (then **8787** can stay localhost-only).
 - If you **stop/start** the instance without an **Elastic IP**, the public IP changes: update env, rebuild both SPAs, update `AUTH_ALLOWED_ORIGINS`, redeploy, and update **Firebase authorized domains** if you list the IP there.
-- After signing in on either app, DevTools → **Application → Cookies** (for your site) should show the auth API response set `__session` (host scoped to your IP). If it never appears, check the Network tab for failed `POST …/session` (CORS, wrong URL, or blocked port).
+- After signing in on either app, DevTools → **Application → Cookies** should show `__session` from the auth responses. If it never appears, check the Network tab for failed `POST …/session` (CORS, wrong URL, or **connection timeout** on `:8787` → use the `/auth-api/` proxy or open **8787** in the security group).
 
 ## Repo root npm shortcuts
 
