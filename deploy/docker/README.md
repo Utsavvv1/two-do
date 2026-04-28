@@ -1,5 +1,7 @@
 # Docker image (Docker Hub)
 
+**Handout for your instructor:** [TEACHER.md](TEACHER.md).
+
 One container serves **two-do** on port **80**, **companion** on **8080**, and proxies **`/auth-api/`** to the **auth-server** on `127.0.0.1:8787` (same layout as the EC2 nginx setup).
 
 Firebase **web** keys are **build arguments** (Vite embeds them). The Firebase **Admin** JSON file is a **runtime** mount (secret).
