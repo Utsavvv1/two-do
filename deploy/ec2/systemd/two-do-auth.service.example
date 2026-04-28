@@ -1,7 +1,10 @@
 # Install: sudo cp two-do-auth.service.example /etc/systemd/system/two-do-auth.service
-# Edit paths and User=, then:
+# Edit WorkingDirectory, ExecStart, User=, and EnvironmentFile to match your server, then:
 #   sudo systemctl daemon-reload
 #   sudo systemctl enable --now two-do-auth
+#
+# User: Amazon Linux 2023 — ec2-user. Ubuntu — often www-data (chown secrets accordingly).
+# Node: use /usr/bin/node (dnf) or full path to nvm’s node if you do not install system Node.
 
 [Unit]
 Description=two-do Firebase session (auth-server)
@@ -9,8 +12,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=www-data
-Group=www-data
+User=ec2-user
+Group=ec2-user
 WorkingDirectory=/opt/two-do/services/auth-server
 Environment=NODE_ENV=production
 EnvironmentFile=/opt/two-do/services/auth-server/.env
@@ -20,3 +23,6 @@ RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
+
+# Nested clone (repo at /opt/two-do/two-do): set WorkingDirectory, EnvironmentFile, and
+# ExecStart to paths under .../two-do/services/auth-server/ instead.

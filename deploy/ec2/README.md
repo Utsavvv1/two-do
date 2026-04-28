@@ -13,7 +13,7 @@ Layout on the server (example):
 
 ## Quick path
 
-On Ubuntu EC2 (Node 20+ and nginx installed):
+On **Ubuntu** or **Amazon Linux 2023** EC2 (Node 20+ and nginx installed). On AL2023 the stock `/etc/nginx/nginx.conf` often includes a second `server { listen 80; ... }` after `include /etc/nginx/conf.d/*.conf;`, which duplicates port 80. Run `deploy/ec2/fix-nginx-main.sh` once (or delete that block by hand) so only `conf.d` owns ports 80/8080. Use `deploy/ec2/nginx.http-ip.example.conf` as a template for HTTP + bare IP before you add TLS.
 
 ```bash
 cd /opt/two-do
@@ -55,11 +55,12 @@ Make executable: `chmod +x deploy/ec2/*.sh`
 
 ## Environment checklist
 
-1. **Firebase Console → Authentication → Authorized domains** — add `todo.example.com`, `companion.example.com`, `auth.example.com`.
-2. **`AUTH_ALLOWED_ORIGINS`** on auth-server — exact `https://…` origins users type in the browser.
-3. **HTTPS** — set `COOKIE_SECURE=1` on auth-server when using TLS.
-4. **Shared parent domain** — set `AUTH_COOKIE_DOMAIN=.example.com` when todo and companion are subdomains of `example.com`.
-5. **`VITE_AUTH_API_URL`** in **both** `.env.production` files — public `https://auth.example.com` (no trailing slash).
+1. **Firebase Console → Authentication → Authorized domains** — add every browser origin you use (hostnames such as `todo.example.com`, or your **EC2 public IP** for `http://IP` / `http://IP:8080` demos). Add the auth API host if it differs (e.g. `http://IP:8787` is usually not required for Firebase client config, but the IP must be authorized for Google sign-in on that host).
+2. **Firestore rules** — deploy the rules in the repo root [`firestore.rules`](../../firestore.rules) (paste into the Firebase console Rules tab or use the Firebase CLI when you add `firebase.json`).
+3. **`AUTH_ALLOWED_ORIGINS`** on auth-server — exact `https://…` or `http://IP:port` origins users type in the browser.
+4. **HTTPS** — set `COOKIE_SECURE=1` on auth-server when using TLS.
+5. **Shared parent domain** — set `AUTH_COOKIE_DOMAIN=.example.com` when todo and companion are subdomains of `example.com`.
+6. **`VITE_AUTH_API_URL`** in **both** `.env.production` files — same scheme/host as the auth API (e.g. `http://YOUR_IP:8787` over HTTP, or `https://auth.example.com` with TLS). **Do not** mix `https://…` here while the API is only serving HTTP.
 
 ## Ports-only (no DNS yet)
 
