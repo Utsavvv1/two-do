@@ -112,7 +112,9 @@ export const AuthProvider: React.FC<{
       lastCheck = now;
       try {
         const r = await fetchWithTimeout(`${apiBase}/session`, { credentials: 'include' }, SESSION_GET_TIMEOUT_MS);
-        if (r.status === 401 && auth.currentUser) {
+        if (!r.ok) return;
+        const data: { customToken?: string } = await r.json().catch(() => ({}));
+        if (!data.customToken && auth.currentUser) {
           await signOut(auth);
         }
       } catch {

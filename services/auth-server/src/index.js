@@ -116,17 +116,27 @@ app.post('/session', async (req, res) => {
   }
 });
 
-/** Return a custom token if session cookie is valid (second app signs in with this) */
+/**
+ * Return a custom token if session cookie is valid (second app signs in with this).
+ * Missing or invalid cookie → 200 {} so browsers do not log a red "401" on every logged-out poll.
+ */
 app.get('/session', async (req, res) => {
   const sessionCookie = req.cookies[COOKIE_NAME];
-  if (!sessionCookie) return res.status(401).end();
+  if (!sessionCookie) return res.json({});
   try {
     const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
     const customToken = await adminAuth.createCustomToken(decoded.uid);
     return res.json({ customToken });
   } catch (e) {
     console.warn('verifySessionCookie', e?.message || e);
-    return res.status(401).end();
+    res.clearCookie(COOKIE_NAME, {
+      path: '/',
+      httpOnly: true,
+      secure: COOKIE_SECURE,
+      sameSite: 'lax',
+      ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
+    });
+    return res.json({});
   }
 });
 
