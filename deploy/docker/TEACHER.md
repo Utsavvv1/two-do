@@ -2,7 +2,7 @@
 
 Use these steps to run the student’s image on **your** computer. You need **Docker** and a small **Firebase service account** file the student will send you separately (not by public GitHub).
 
-**Image name (student will fill in):** `YOUR_STUDENT_DOCKERHUB_USERNAME/two-do:latest`
+**Image name (student will fill in):** `pxrple1/two-do:latest`
 
 ---
 
@@ -29,12 +29,12 @@ Use these steps to run the student’s image on **your** computer. You need **Do
 ### Windows (PowerShell)
 
 ```powershell
-docker pull YOUR_STUDENT_DOCKERHUB_USERNAME/two-do:latest
+docker pull pxrple1/two-do:latest
 
 docker run --init --rm -p 80:80 -p 8080:8080 `
   -e GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/firebase.json `
   -v "C:\Users\YourName\Downloads\two-do-firebase.json:/run/secrets/firebase.json:ro" `
-  YOUR_STUDENT_DOCKERHUB_USERNAME/two-do:latest
+  pxrple1/two-do:latest
 ```
 
 Change the path in `-v "..."` to **your actual JSON path**.
@@ -44,12 +44,12 @@ Leave this window **open** while testing. **Ctrl+C** stops the app.
 ### Mac or Linux (Terminal)
 
 ```bash
-docker pull YOUR_STUDENT_DOCKERHUB_USERNAME/two-do:latest
+docker pull pxrple1/two-do:latest
 
 docker run --init --rm -p 80:80 -p 8080:8080 \
   -e GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/firebase.json \
   -v "/Users/YourName/Downloads/two-do-firebase.json:/run/secrets/firebase.json:ro" \
-  YOUR_STUDENT_DOCKERHUB_USERNAME/two-do:latest
+  pxrple1/two-do:latest
 ```
 
 ---
