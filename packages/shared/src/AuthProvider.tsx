@@ -10,6 +10,18 @@ import {
 import type { Auth, GoogleAuthProvider, User } from 'firebase/auth';
 import { AuthContext } from './authContext';
 
+/** Avoid hanging forever when auth-server is slow or SG blocks :8787 from the browser. */
+const SESSION_GET_TIMEOUT_MS = 8000;
+const SESSION_POST_TIMEOUT_MS = 20_000;
+
+function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const id = window.setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { ...init, signal: controller.signal }).finally(() => {
+    window.clearTimeout(id);
+  });
+}
+
 export type SessionSyncConfig = {
   apiBaseUrl: string;
 };
@@ -30,53 +42,59 @@ export const AuthProvider: React.FC<{
     const u = auth.currentUser;
     if (!u) return;
     const idToken = await u.getIdToken();
-    await fetch(`${apiBase}/session`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken }),
-    });
+    await fetchWithTimeout(
+      `${apiBase}/session`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      },
+      SESSION_POST_TIMEOUT_MS,
+    );
   };
 
   const clearServerSession = async () => {
     if (!apiBase) return;
     try {
-      await fetch(`${apiBase}/logout`, { method: 'POST', credentials: 'include' });
+      await fetchWithTimeout(`${apiBase}/logout`, { method: 'POST', credentials: 'include' }, SESSION_GET_TIMEOUT_MS);
     } catch {
       /* ignore */
     }
   };
 
   useEffect(() => {
-    let unsub: (() => void) | undefined;
     let cancelled = false;
 
+    const unsub = onAuthStateChanged(auth, (nextUser) => {
+      if (cancelled) return;
+      setUser(nextUser);
+      setLoading(false);
+    });
+
     void (async () => {
-      if (apiBase) {
-        try {
-          const r = await fetch(`${apiBase}/session`, { credentials: 'include' });
-          if (r.ok) {
-            const data: { customToken?: string } = await r.json();
-            if (data.customToken && !cancelled) {
+      if (!apiBase || cancelled) return;
+      try {
+        const r = await fetchWithTimeout(`${apiBase}/session`, { credentials: 'include' }, SESSION_GET_TIMEOUT_MS);
+        if (cancelled) return;
+        if (r.ok) {
+          const data: { customToken?: string } = await r.json();
+          if (data.customToken && !cancelled) {
+            try {
               await signInWithCustomToken(auth, data.customToken);
+            } catch {
+              /* bad or stale token — stay on client session */
             }
           }
-        } catch {
-          /* API unreachable — fall back to client-only Firebase */
         }
+      } catch {
+        /* API unreachable or timeout — client-only Firebase; UI already unblocked */
       }
-
-      if (cancelled) return;
-
-      unsub = onAuthStateChanged(auth, (nextUser) => {
-        setUser(nextUser);
-        setLoading(false);
-      });
     })();
 
     return () => {
       cancelled = true;
-      unsub?.();
+      unsub();
     };
   }, [auth, apiBase]);
 
@@ -93,7 +111,7 @@ export const AuthProvider: React.FC<{
       if (!force && now - lastCheck < debounceMs) return;
       lastCheck = now;
       try {
-        const r = await fetch(`${apiBase}/session`, { credentials: 'include' });
+        const r = await fetchWithTimeout(`${apiBase}/session`, { credentials: 'include' }, SESSION_GET_TIMEOUT_MS);
         if (r.status === 401 && auth.currentUser) {
           await signOut(auth);
         }

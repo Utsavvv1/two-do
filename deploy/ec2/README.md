@@ -66,6 +66,13 @@ Make executable: `chmod +x deploy/ec2/*.sh`
 
 You can use `http://EC2_PUBLIC_IP:5173` style only for smoke tests; session cookies and `COOKIE_SECURE` are much simpler with proper HTTPS + hostnames. For class demos, use HTTP on one machine with `COOKIE_SECURE` unset and list exact `http://IP:port` entries in `AUTH_ALLOWED_ORIGINS`.
 
+### SSO across port 80 and 8080 (same IP)
+
+- **`AUTH_ALLOWED_ORIGINS`** must include **both** browser origins exactly, e.g. `http://203.0.113.4` **and** `http://203.0.113.4:8080` (no trailing slashes). If one is missing, that app cannot exchange the session cookie with the auth API.
+- **`VITE_AUTH_API_URL`** must be the same in **both** built apps (usually `http://YOUR_IP:8787`), and the security group must allow **8787** from browsers, not only SSH.
+- If you **stop/start** the instance without an **Elastic IP**, the public IP changes: update env, rebuild both SPAs, update `AUTH_ALLOWED_ORIGINS`, redeploy, and update **Firebase authorized domains** if you list the IP there.
+- After signing in on either app, DevTools → **Application → Cookies** (for your site) should show the auth API response set `__session` (host scoped to your IP). If it never appears, check the Network tab for failed `POST …/session` (CORS, wrong URL, or blocked port).
+
 ## Repo root npm shortcuts
 
 From the project root (any OS):
