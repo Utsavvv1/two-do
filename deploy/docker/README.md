@@ -63,7 +63,7 @@ docker run --init --rm -p 80:80 -p 8080:8080 \
   YOUR_DOCKERHUB_USER/two-do:latest
 ```
 
-4. Open **http://localhost/** (two-do) and **http://localhost:8080/** (companion).  
+4. Open **http://localhost/** (two-do) and **http://localhost:8080/** (companion). Use **`localhost` for both**, not **`127.0.0.1`**, unless you rebuild with `VITE_AUTH_API_URL_*` using `127.0.0.1` (they are different origins and SSO breaks easily if you mix them).
 5. In Firebase Console → Authentication → **Authorized domains**, add **`localhost`** (if not already).
 
 `--init` helps signal handling for the Node + nginx process tree.
@@ -89,7 +89,9 @@ Teachers still need **Firestore rules** published in the Firebase project (see r
 | Blank / auth errors | Build-args match the same Firebase project as the service account JSON |
 | CORS / session | `AUTH_ALLOWED_ORIGINS` matches exactly what appears in the browser address bar (`http://localhost` vs `http://127.0.0.1`) |
 | Port in use | Change mapping: `-p 8081:8080 -p 9080:80` then open `http://localhost:9080` and `http://localhost:8081` — you must **rebuild** with updated `VITE_AUTH_API_URL_*` for those ports |
-
+| `net::ERR_BLOCKED_BY_CLIENT` on Firestore | Browser extension (uBlock, AdGuard, Brave Shields). Disable for **localhost** or use an **InPrivate/Incognito** window with extensions off — otherwise listens fail and the app looks “broken” after sign-in. |
+| Login OK on **:8080** but not **:80** (or the reverse) | You’re mixing **`http://localhost`** and **`http://127.0.0.1`**. Use **only** `http://localhost` in both tabs, or only `http://127.0.0.1` in both and rebuild with matching `VITE_AUTH_API_URL_*` + `AUTH_ALLOWED_ORIGINS`. |
+| `Cross-Origin-Opener-Policy` + `window.close` (Google popup) | Harmless Chrome noise for many setups; sign-in can still succeed. To avoid popups, use **email/password** for testing. |
 ## Optional: Docker Compose
 
 Copy [`compose.example.yaml`](compose.example.yaml) to the **repo root** as `compose.yaml`, add a `.env` with your `VITE_FIREBASE_*`, `DOCKERHUB_USER`, and `FIREBASE_SERVICE_ACCOUNT_JSON_HOST_PATH`, then run `docker compose up --build`.

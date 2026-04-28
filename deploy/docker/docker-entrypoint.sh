@@ -8,7 +8,8 @@ if [ ! -f "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
 fi
 
 export PORT="${PORT:-8787}"
-export AUTH_ALLOWED_ORIGINS="${AUTH_ALLOWED_ORIGINS:-http://localhost,http://localhost:8080}"
+# Include 127.0.0.1 so CORS works if the browser URL doesn't match localhost (still prefer one hostname consistently; see README).
+export AUTH_ALLOWED_ORIGINS="${AUTH_ALLOWED_ORIGINS:-http://localhost,http://localhost:8080,http://127.0.0.1,http://127.0.0.1:8080}"
 export NODE_ENV="${NODE_ENV:-production}"
 
 cd /opt/auth-server
